@@ -3,13 +3,14 @@ package GUI;
 import java.awt.*;
 import java.awt.event.*;
 import java.io.*;
-import java.text.DecimalFormat;
+//import java.text.DecimalFormat;
 
 import javax.swing.*;
 
 //import GUI.*;
 import GUI.Formatter.*;
 import GUI.Justifier;
+import GUI.RJustifier;
 
 //***************************************************************
 //The formatter example is at line 109 to end of function
@@ -24,15 +25,21 @@ public class MainWindow implements ActionListener {
 	private JFrame mainFrame;
 	JTabbedPane tabbedPane = getTabbedPane();
 	private JTextField inputFileNameTextField;
+	private JTextField lineLengthTextField;
 	private JTextField outputFileNameTextField;
 	private JTextField averageLineTextField;
 	private JTextField averageWordsTextField;
 	private JTextField blankLinetextField;
 	private JTextField lineCountTextField;
 	private JTextField wordCountTextField;
+	private JTextField addedSpacesTextField;
 	private JRadioButton leftJustificationRadioButton;
 	private JRadioButton rightJustificationradioButton;
+	private JRadioButton fullJustificationradioButton;
+	private JRadioButton singleSpaceRadioButton;
+	private JRadioButton doubleSpaceRadioButton;
 	private ButtonGroup group;
+	private ButtonGroup group2;
 
 	private static String inputFilePlaceHolder = "Enter File  Location and Name - Input File - .txt only";
 	private static String outputFilePlaceHolder = "Enter File  Location and Name - Output File - .txt only";
@@ -72,6 +79,7 @@ public class MainWindow implements ActionListener {
 		tabbedPane.addTab("File Selection", null, fileSelectionPanel, null);
 
 		group = new ButtonGroup();
+		group2 = new ButtonGroup();
 
 		JPanel inptFileSelectionPanel = getInputFileSelectionPanel();
 		fileSelectionPanel.add(inptFileSelectionPanel);
@@ -87,6 +95,9 @@ public class MainWindow implements ActionListener {
 
 		JButton outputFileBrowseButton = getOutputFIleBrowseButton(tabbedPane);
 		outputFileSelectionPanel.add(outputFileBrowseButton);
+		
+		JPanel lineLengthPanel = getLineLengthPanel();
+		fileSelectionPanel.add(lineLengthPanel);
 
 		getOutputFileNameTextField();
 		outputFileSelectionPanel.add(outputFileNameTextField);
@@ -98,6 +109,18 @@ public class MainWindow implements ActionListener {
 		rightJustificationradioButton = getRightJustifyRadioButton();
 		group.add(rightJustificationradioButton);
 		fileSelectionPanel.add(rightJustificationradioButton);
+		
+		fullJustificationradioButton = getFullJustifyRdioButton(); //getRightJustifyRadioButton();
+		group.add(fullJustificationradioButton);
+		fileSelectionPanel.add(fullJustificationradioButton);
+		
+		singleSpaceRadioButton = getSingleSpaceRadioButton();
+		group2.add(singleSpaceRadioButton);
+		fileSelectionPanel.add(singleSpaceRadioButton);
+		
+		doubleSpaceRadioButton = getDoubleSpaceRadioButton();
+		group2.add(doubleSpaceRadioButton);
+		fileSelectionPanel.add(doubleSpaceRadioButton);
 
 		JButton btnFormat = getFormatButton();
 		btnFormat.addActionListener(this);
@@ -120,7 +143,15 @@ public class MainWindow implements ActionListener {
 
 		JPanel wordCountPanel = getWordCountPanel();
 		outputStatsPanel.add(wordCountPanel);
-
+		
+		JPanel addedSpacesPanel = getAddedSpacesPanel();
+		outputStatsPanel.add(addedSpacesPanel);
+		
+		//RJustifier.fullJustified("C:\\Users\\theri\\eclipse-workspace\\CSE360_Project\\testInput.txt", "C:\\Users\\theri\\eclipse-workspace\\CSE360_Project\\testOutput.txt", 80, true);
+		//RJustifier.rightJustified("C:\\Users\\theri\\eclipse-workspace\\CSE360_Project\\testInput.txt", "C:\\Users\\theri\\eclipse-workspace\\CSE360_Project\\testOutput1.txt", 80, true);
+		//Justifier.leftJustified("C:\\Users\\theri\\eclipse-workspace\\CSE360_Project\\testInput.txt", "C:\\Users\\theri\\eclipse-workspace\\CSE360_Project\\testOutput2.txt", 80, true);
+		
+		
 		/*
 		 * frame.setIconImage(icon);
 		 */
@@ -175,8 +206,9 @@ public class MainWindow implements ActionListener {
 		}
 		if (format()) {
 
-			if (rightJustificationradioButton.isSelected()) {
-				FormatterOutput result = RJustifier.rightJustified(inputName, outputName);
+			if (rightJustificationradioButton.isSelected()) 
+			{
+				FormatterOutput result = RJustifier.rightJustified(inputName, outputName, getLineLengthNum(), doubleSpaceRadioButton.isSelected()); //change 80 later
 				SetFields(result);
 				// rightJustified function call here
 				/*
@@ -184,10 +216,17 @@ public class MainWindow implements ActionListener {
 				 * SetFields(result);
 				 */
 				// Add changing to stats window here or call stats function
-			} else {
-				FormatterOutput result = Justifier.leftJustified(inputName, outputName);
+			} 
+			else if (leftJustificationRadioButton.isSelected())
+			{
+				FormatterOutput result = Justifier.leftJustified(inputName, outputName, getLineLengthNum(),doubleSpaceRadioButton.isSelected()); //change 80 later
 				SetFields(result);
 				// Add changing to stats window here or call stats function
+			}
+			else
+			{
+				FormatterOutput result = RJustifier.fullJustified(inputName, outputName, getLineLengthNum(), doubleSpaceRadioButton.isSelected());
+				SetFields(result);
 			}
 		} else {
 			SetFields(null);
@@ -197,11 +236,12 @@ public class MainWindow implements ActionListener {
 
 	private void SetFields(FormatterOutput result) {
 		if (result != null) {
-			lineCountTextField.setText(Integer.toString(Statistics.lineCount(result)));
+			lineCountTextField.setText(Integer.toString(Statistics.lineCount(result, doubleSpaceRadioButton.isSelected())));
 			blankLinetextField.setText(Integer.toString(Statistics.blankLinesRemoved(result)));
 			wordCountTextField.setText(Integer.toString(Statistics.wordCount(result)));
-			averageWordsTextField.setText(String.format("%#.2f", Statistics.averageWordPerLine(result)));
-			averageLineTextField.setText(String.format("%#.2f", Statistics.averageLineLength(result)));
+			addedSpacesTextField.setText(Integer.toString(Statistics.totalAddedSpaces(result, rightJustificationradioButton.isSelected(), fullJustificationradioButton.isSelected(), getLineLengthNum())));
+			averageWordsTextField.setText(String.format("%#.2f", Statistics.averageWordPerLine(result, doubleSpaceRadioButton.isSelected())));
+			averageLineTextField.setText(String.format("%#.2f", Statistics.averageLineLength(result, doubleSpaceRadioButton.isSelected())));
 		}
 
 		else {
@@ -222,9 +262,9 @@ public class MainWindow implements ActionListener {
 		boolean formatFlag = false;
 		PrintWriter writer = null;
 		try {
-			writer = new PrintWriter(outputFileNameTextField.getText());
+			writer = new PrintWriter(outputFileNameTextField.getText(), "utf-8");
 			FormatterOutput formatTest = new FormatterOutput();
-			formatTest = Formatter.formatInput(inputFileNameTextField.getText());
+			formatTest = Formatter.formatInput(inputFileNameTextField.getText(), getLineLengthNum()); //change 80 later
 
 			if (formatTest != null) {
 				// writer.println("Blanks Removed: " + formatTest.linesRem);
@@ -258,6 +298,44 @@ public class MainWindow implements ActionListener {
 		} catch (Exception e) {
 			return "";
 		}
+	}
+	
+	private int getLineLengthNum()
+	{
+		int tempNum = Integer.parseInt(lineLengthTextField.getText());
+		if (tempNum <= 20)
+		{
+			return -1;
+		}
+		else if (tempNum > 100)
+		{
+			return -1;
+		}
+		else
+		{
+			return tempNum;
+		}
+	}
+	
+	private JPanel getLineLengthPanel() {
+		JPanel lineLengthPanel = new JPanel();
+		lineLengthPanel.setBackground(SystemColor.inactiveCaption);
+		lineLengthPanel.setBounds(60, 220, 850, 50);
+		lineLengthPanel.setLayout(null);
+
+		lineLengthTextField = new JTextField();
+		lineLengthTextField.setEditable(true);
+		lineLengthTextField.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		lineLengthTextField.setColumns(10);
+		lineLengthTextField.setBounds(new Rectangle(850 - 80, 5, 75, 40));
+		lineLengthTextField.setText("20");
+		lineLengthPanel.add(lineLengthTextField);
+
+		JLabel lineLengthLabel = new JLabel("Line Length (20 to 100 characters)");
+		lineLengthLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		lineLengthLabel.setBounds(15, 5, 400, 40);
+		lineLengthPanel.add(lineLengthLabel);
+		return lineLengthPanel;
 	}
 
 	private JPanel getWordCountPanel() {
@@ -340,6 +418,26 @@ public class MainWindow implements ActionListener {
 		averageWordspanel.add(averageWordsLabel);
 		return averageWordspanel;
 	}
+	
+	private JPanel getAddedSpacesPanel() {
+		JPanel addedSpacespanel = new JPanel();
+		addedSpacespanel.setBackground(SystemColor.inactiveCaption);
+		addedSpacespanel.setBounds(50, 449, 600, 60);
+		addedSpacespanel.setLayout(null);
+
+		addedSpacesTextField = new JTextField();
+		addedSpacesTextField.setEditable(false);
+		addedSpacesTextField.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		addedSpacesTextField.setColumns(10);
+		addedSpacesTextField.setBounds(new Rectangle(510, 10, 75, 40));
+		addedSpacespanel.add(addedSpacesTextField);
+
+		JLabel addedSpacesLabel = new JLabel("Total Added Spaces");
+		addedSpacesLabel.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		addedSpacesLabel.setBounds(15, 10, 300, 40);
+		addedSpacespanel.add(addedSpacesLabel);
+		return addedSpacespanel;
+	}
 
 	private JPanel getAverageLineLengthPanel() {
 		JPanel averageLineLengthPanel = new JPanel();
@@ -373,18 +471,16 @@ public class MainWindow implements ActionListener {
 
 	private JButton getFormatButton() {
 		JButton btnFormat = new JButton("Format");
-		btnFormat.setBounds(393, 298, 150, 50);
+		btnFormat.setBounds(393, 380, 150, 50);
 		btnFormat.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		btnFormat.setFocusPainted(false);
 		return btnFormat;
 	}
 
 	private JRadioButton getRightJustifyRadioButton() {
 		JRadioButton rightJustificationradioButton = new JRadioButton("Right Justification");
-		rightJustificationradioButton.setFocusPainted(false);
 		rightJustificationradioButton.setBackground(Color.WHITE);
 		rightJustificationradioButton.setBounds(new Rectangle(0, 0, 8, 9));
-		rightJustificationradioButton.setBounds(588, 244, 190, 29);
+		rightJustificationradioButton.setBounds(350, 290, 190, 30);
 		rightJustificationradioButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		rightJustificationradioButton.setSelected(false);
 		return rightJustificationradioButton;
@@ -392,13 +488,42 @@ public class MainWindow implements ActionListener {
 
 	private JRadioButton getLeftJustifyRdioButton() {
 		JRadioButton leftJustificationRadioButton = new JRadioButton("Left Justification");
-		leftJustificationRadioButton.setFocusPainted(false);
 		leftJustificationRadioButton.setBackground(Color.WHITE);
 		leftJustificationRadioButton.setBounds(new Rectangle(0, 0, 8, 9));
-		leftJustificationRadioButton.setBounds(183, 244, 190, 29);
+		leftJustificationRadioButton.setBounds(60, 290, 190, 30);
 		leftJustificationRadioButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
 		leftJustificationRadioButton.setSelected(true);
 		return leftJustificationRadioButton;
+	}
+	
+	private JRadioButton getFullJustifyRdioButton() {
+		JRadioButton fullJustificationRadioButton = new JRadioButton("Full Justification");
+		fullJustificationRadioButton.setBackground(Color.WHITE);
+		fullJustificationRadioButton.setBounds(new Rectangle(0, 0, 8, 9));
+		fullJustificationRadioButton.setBounds(700, 290, 190, 30);
+		fullJustificationRadioButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		fullJustificationRadioButton.setSelected(false);
+		return fullJustificationRadioButton;
+	}
+	
+	private JRadioButton getSingleSpaceRadioButton() {
+		JRadioButton singleSpaceRadioButton = new JRadioButton("Single Spacing");
+		singleSpaceRadioButton.setBackground(Color.WHITE);
+		singleSpaceRadioButton.setBounds(new Rectangle(0, 0, 8, 9));
+		singleSpaceRadioButton.setBounds(200, 335, 190, 30);
+		singleSpaceRadioButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		singleSpaceRadioButton.setSelected(true);
+		return singleSpaceRadioButton;
+	}
+	
+	private JRadioButton getDoubleSpaceRadioButton() {
+		JRadioButton singleDoubleRadioButton = new JRadioButton("Double Spacing");
+		singleDoubleRadioButton.setBackground(Color.WHITE);
+		singleDoubleRadioButton.setBounds(new Rectangle(0, 0, 8, 9));
+		singleDoubleRadioButton.setBounds(600, 335, 190, 30);
+		singleDoubleRadioButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
+		singleDoubleRadioButton.setSelected(false);
+		return singleDoubleRadioButton;
 	}
 
 	private void getOutputFileNameTextField() {
@@ -424,7 +549,6 @@ public class MainWindow implements ActionListener {
 			}
 		});
 		outputFileBrowseButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		outputFileBrowseButton.setFocusPainted(false);
 		outputFileBrowseButton.setBounds(new Rectangle(46, 7, 100, 35));
 		outputFileBrowseButton.setBackground(Color.WHITE);
 		return outputFileBrowseButton;
@@ -462,7 +586,6 @@ public class MainWindow implements ActionListener {
 			}
 		});
 		inputFileBrowseButton.setFont(new Font("Tahoma", Font.PLAIN, 20));
-		inputFileBrowseButton.setFocusPainted(false);
 		inputFileBrowseButton.setBackground(Color.WHITE);
 		inputFileBrowseButton.setBounds(new Rectangle(40, 0, 0, 0));
 		inputFileBrowseButton.setBounds(40, 7, 100, 35);
@@ -489,7 +612,6 @@ public class MainWindow implements ActionListener {
 
 	private JTabbedPane getTabbedPane() {
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
-		tabbedPane.setFocusable(false);
 		tabbedPane.setBackground(Color.LIGHT_GRAY);
 		tabbedPane.setFont(new Font("Tahoma", Font.PLAIN, 18));
 		tabbedPane.setOpaque(true);
@@ -505,8 +627,8 @@ public class MainWindow implements ActionListener {
 
 	private void addMainFrame() {
 		mainFrame = new JFrame();
-		mainFrame.setResizable(false);
-		mainFrame.setBounds(100, 100, 1015, 675);
+		mainFrame.setResizable(true);
+		mainFrame.setBounds(100, 100, 1022, 715);
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		mainFrame.getContentPane().setLayout(null);
 		mainFrame.setLocationRelativeTo(null);

@@ -6,7 +6,7 @@ package GUI;
 
 import java.io.*;
 import java.util.LinkedList;
-import GUI.*;
+//import GUI.*;
 
 public class Formatter {
 	
@@ -24,7 +24,7 @@ public class Formatter {
 	private static char[] tempInput;
 	private static char tempChar;
 	
-	public static FormatterOutput formatInput(String fileName) throws IOException
+	public static FormatterOutput formatInput(String fileName, int lineLength) throws IOException
 	{
 		
 		InputStream is = new FileInputStream(fileName);
@@ -41,7 +41,7 @@ public class Formatter {
 		
 		inputline = stdin.readLine();
 		
-		newLine = new Helper();
+		newLine = new Helper(lineLength);
 		if(inputline == null || inputline.length() == 0) {
 			is.close();
 			isr.close();
@@ -78,7 +78,7 @@ public class Formatter {
 						x++;
 						if (x >= tempInput.length)
 						{
-							lineCheck();
+							lineCheck(lineLength);
 							break;
 						}
 						else
@@ -100,7 +100,7 @@ public class Formatter {
 							}
 						}
 						
-						lineCheck();
+						lineCheck(lineLength);
 						
 						x++;
 						getNextChar();
@@ -119,17 +119,17 @@ public class Formatter {
 		return outputItem;
 	}
 	
-	private static void lineCheck()
+	private static void lineCheck(int lineLength)
 	{
 		if (newLine.getSize() <= 0)
 		{
 			newLine.addWord(tempStr);
 		}
 		
-		else if ((newLine.getSize() + tempStr.length()) >= 80)
+		else if ((newLine.getSize() + tempStr.length()) >= lineLength)
 		{
 			outputItem.inputList.add(newLine);
-			newLine = new Helper();
+			newLine = new Helper(lineLength);
 			newLine.addWord(tempStr);
 		}
 		else

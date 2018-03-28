@@ -19,14 +19,17 @@ public class Helper
 	private int lineSize;
 	private LinkedList<LineWord> lineStr;
 	private int wordsInLine;
+	private int lineLength;
+	private int nonSpaceCharacters;
 	
 	
 	
 	//constructor sets vars to empty
-	public Helper()
+	public Helper(int lineLength)
 	{
 		lineSize = 0;
 		lineStr = new LinkedList<LineWord>();
+		this.lineLength = lineLength;
 	}
 	
 	//getters
@@ -62,6 +65,11 @@ public class Helper
 		return lineSize;
 	}
 	
+	public int getNonSpaceSize()
+	{
+		return nonSpaceCharacters;
+	}
+	
 	public int getWordsInLine()
 	{
 		return wordsInLine;
@@ -78,7 +86,7 @@ public class Helper
 	//setters
 	public boolean addWord(String newStr)
 	{
-		if((lineSize + newStr.length()) <= 80)
+		if((lineSize + newStr.length()) <= lineLength)
 		{
 			if(lineSize > 0)
 			{
@@ -91,6 +99,7 @@ public class Helper
 			
 			lineStr.add(temp);
 			lineSize += newStr.length();
+			nonSpaceCharacters += newStr.length();
 			wordsInLine++;
 			
 			return true;
@@ -104,6 +113,7 @@ public class Helper
 			
 			lineStr.add(temp);
 			lineSize += newStr.length();
+			nonSpaceCharacters += newStr.length();
 			wordsInLine++;
 			
 			return true;
