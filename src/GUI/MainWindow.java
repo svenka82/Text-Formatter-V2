@@ -177,7 +177,12 @@ public class MainWindow implements ActionListener {
 					JOptionPane.WARNING_MESSAGE);
 			return;
 		}
-
+		else if (getLineLengthNum() <= 0)
+		{
+			JOptionPane.showMessageDialog(null, "Please input between 20 and 100.", "Invalid Line Length.", 
+					JOptionPane.WARNING_MESSAGE);
+			return;
+		}
 		else if (inputName.equalsIgnoreCase(outputName)) {
 			JOptionPane.showMessageDialog(null,
 					"Error - Output file must be different than input file name.\nPlease choose a different name.",
