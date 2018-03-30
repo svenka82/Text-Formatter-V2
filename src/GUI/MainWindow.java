@@ -308,7 +308,7 @@ public class MainWindow implements ActionListener {
 	private int getLineLengthNum()
 	{
 		int tempNum = Integer.parseInt(lineLengthTextField.getText());
-		if (tempNum <= 20)
+		if (tempNum < 20)
 		{
 			return -1;
 		}
